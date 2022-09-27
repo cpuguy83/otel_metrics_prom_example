@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  app:
+    build: .
+    depends_on:
+      - otelcollector
+    environment:
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=otelcollector:4318"
+
+  otelcollector:
+    image: otel/opentelemetry-collector:0.60.0
+    volumes:
+      - ./otel.yml:/etc/otelcol/config.yaml
+    ports:
+      - "4318:4318" # OTLP http receiver
+      - "8889:8889" # Prometheus exporter
+
+  prometheus:
+    image: prom/prometheus:v2.26.0
+    ports:
+      - "9090:9090" # Prometheus metrics
+    volumes:
+      - ./prom.yml:/etc/prometheus/prometheus.yml
